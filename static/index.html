@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain Intelligence — SMARTe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0b;--surface:#111113;--surface2:#18181b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f4f4f5;--muted:#71717a;
+  --accent:#6366f1;--accent2:#818cf8;
+  --tag:#a5b4fc;--tag-bg:rgba(99,102,241,0.12);
+  --sans:'DM Sans',sans-serif;--serif:'Instrument Serif',serif;--mono:'DM Mono',monospace;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+.shell{max-width:900px;margin:0 auto;padding:0 24px 80px}
+
+header{padding:48px 0 36px;border-bottom:1px solid var(--border);margin-bottom:36px}
+.badge{display:inline-flex;align-items:center;gap:7px;margin-bottom:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.badge-text{font-family:var(--mono);font-size:12px;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase}
+h1{font-family:var(--serif);font-size:40px;font-weight:400;line-height:1.15;margin-bottom:8px}
+h1 em{font-style:italic;color:var(--accent2)}
+.sub{font-size:15px;color:var(--muted)}
+
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:28px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+input{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:15px;padding:11px 16px;outline:none;transition:border-color .15s;width:100%}
+input:focus{border-color:var(--accent)}
+input::placeholder{color:var(--muted)}
+.btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px;cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:.02em}
+.btn:hover{opacity:.88}
+.btn:active{transform:scale(.99)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+.status-bar{display:none;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:14px;color:var(--muted)}
+.status-bar.show{display:flex}
+.spinner{width:15px;height:15px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{display:none;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:14px 18px;font-size:14px;color:#f87171;margin-bottom:20px}
+.err.show{display:block}
+
+#result{display:none}
+#result.show{display:block}
+.sec-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+
+.company-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px}
+.co-name{font-family:var(--serif);font-size:32px;font-weight:400;line-height:1.2;margin-bottom:10px}
+.co-desc{font-size:15px;color:var(--muted);line-height:1.65;margin-bottom:18px}
+.vp-pill{background:var(--tag-bg);border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:14px;color:var(--tag);line-height:1.5}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px}
+.card h3{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.tp{background:var(--tag-bg);color:var(--tag)}
+.tg{background:rgba(52,211,153,.1);color:#6ee7b7}
+.tgr{background:rgba(255,255,255,.06);color:var(--muted)}
+.none{font-size:13px;color:var(--muted);font-style:italic}
+
+.offerings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:16px}
+.o-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color .15s}
+.o-card:hover{border-color:var(--border2)}
+.o-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.o-cat{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--accent2);display:inline-block;margin-bottom:10px}
+.o-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+.o-vp{font-size:13px;line-height:1.5;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.04);border-left:2px solid var(--accent);margin-bottom:10px}
+.pains{list-style:none;display:flex;flex-direction:column;gap:4px}
+.pains li{font-size:12px;color:var(--muted);padding-left:14px;position:relative}
+.pains li::before{content:'→';position:absolute;left:0;color:var(--accent2);font-size:11px}
+
+.json-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 18px;margin-top:24px;cursor:pointer;font-size:13px;color:var(--muted);user-select:none;transition:border-color .15s}
+.json-row:hover{border-color:var(--border2)}
+.json-row.open{border-radius:10px 10px 0 0}
+pre{background:var(--surface2);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:20px;font-family:var(--mono);font-size:12px;color:#a5b4fc;overflow-x:auto;line-height:1.6;display:none}
+pre.show{display:block}
+
+@media(max-width:600px){.g2{grid-template-columns:1fr}h1{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="badge">
+      <div class="dot"></div>
+      <span class="badge-text">SMARTe · Context Center</span>
+    </div>
+    <h1>Domain <em>Intelligence</em></h1>
+    <p class="sub">Extract structured GTM intelligence from any company domain.</p>
+  </header>
+
+  <div class="form-card">
+    <div class="field">
+      <label>Company Domain</label>
+      <input type="text" id="domain" placeholder="e.g. hubspot.com, edsanta.com" autocomplete="off">
+    </div>
+    <button class="btn" id="btn" onclick="run()">Extract Intelligence</button>
+  </div>
+
+  <div class="status-bar" id="status">
+    <div class="spinner"></div>
+    <span>Fetching pages and extracting signals…</span>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div id="result">
+
+    <p class="sec-label">Company Overview</p>
+    <div class="company-card">
+      <div class="co-name" id="r-name"></div>
+      <div class="co-desc" id="r-desc"></div>
+      <div class="vp-pill" id="r-vp"></div>
+    </div>
+
+    <div class="g2">
+      <div class="card"><h3>ICP &amp; Personas</h3><div id="r-icp"></div></div>
+      <div class="card"><h3>Customers &amp; Partners</h3><div id="r-eco"></div></div>
+    </div>
+
+    <div class="g2">
+      <div class="card"><h3>Target Industries</h3><div id="r-ind"></div></div>
+      <div class="card"><h3>Company Size &amp; Pricing</h3><div id="r-size"></div></div>
+    </div>
+
+    <p class="sec-label" style="margin-top:8px">Products &amp; Offerings</p>
+    <div class="offerings-grid" id="r-offerings"></div>
+
+    <div class="json-row" id="json-toggle" onclick="toggleJson()">
+      <span style="font-family:var(--mono);font-size:12px">{ } Raw JSON</span>
+      <span id="json-label">show ↓</span>
+    </div>
+    <pre id="r-json"></pre>
+
+  </div>
+</div>
+
+<script>
+let jsonOpen = false;
+
+function tags(arr, cls) {
+  if (!arr?.length) return '<span class="none">Not found</span>';
+  return '<div class="tags">' + arr.map(t => `<span class="tag ${cls}">${t}</span>`).join('') + '</div>';
+}
+
+function render(d) {
+  document.getElementById('r-name').textContent = d.company_name || '—';
+  document.getElementById('r-desc').textContent = d.description  || '—';
+  document.getElementById('r-vp').textContent   = d.value_proposition || '—';
+
+  const icp = d.icp || {};
+  let icpHtml = tags(icp.personas, 'tp');
+  if (icp.company_size?.length) icpHtml += '<div style="margin-top:8px">' + tags(icp.company_size, 'tg') + '</div>';
+  document.getElementById('r-icp').innerHTML = icpHtml;
+
+  let ecoHtml = tags(d.existing_customers, 'tgr');
+  if (d.partners?.length) ecoHtml += '<div style="margin-top:8px">' + tags(d.partners, 'tgr') + '</div>';
+  document.getElementById('r-eco').innerHTML = ecoHtml;
+
+  document.getElementById('r-ind').innerHTML  = tags(icp.industries, 'tg');
+
+  let sizeHtml = tags(icp.company_size, 'tg');
+  if (d.pricing_tier) sizeHtml += `<p style="margin-top:10px;font-size:13px;color:var(--muted)">Pricing: <span style="color:var(--text)">${d.pricing_tier}</span></p>`;
+  document.getElementById('r-size').innerHTML = sizeHtml;
+
+  const offs = d.offerings || [];
+  document.getElementById('r-offerings').innerHTML = !offs.length
+    ? '<p class="none">No named products identified.</p>'
+    : offs.map(o => `
+        <div class="o-card">
+          <div class="o-name">${o.name||''}</div>
+          <div class="o-cat">${o.category||''}</div>
+          <div class="o-desc">${o.description||''}</div>
+          ${o.value_proposition ? `<div class="o-vp">${o.value_proposition}</div>` : ''}
+          ${o.pain_points?.length ? `<ul class="pains">${o.pain_points.map(p=>`<li>${p}</li>`).join('')}</ul>` : ''}
+        </div>`).join('');
+
+  document.getElementById('r-json').textContent = JSON.stringify(d, null, 2);
+  document.getElementById('result').classList.add('show');
+}
+
+async function run() {
+  const domain = document.getElementById('domain').value.trim();
+  if (!domain) { showErr('Please enter a domain.'); return; }
+
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('err').classList.remove('show');
+  document.getElementById('btn').disabled = true;
+  document.getElementById('status').classList.add('show');
+
+  try {
+    const res = await fetch('/scrape', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({domain}),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(()=>({detail:res.statusText}));
+      throw new Error(e.detail || 'Scrape failed');
+    }
+    render(await res.json());
+  } catch(e) {
+    showErr(e.message);
+  } finally {
+    document.getElementById('status').classList.remove('show');
+    document.getElementById('btn').disabled = false;
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function toggleJson() {
+  jsonOpen = !jsonOpen;
+  document.getElementById('r-json').classList.toggle('show', jsonOpen);
+  document.getElementById('json-label').textContent = jsonOpen ? 'hide ↑' : 'show ↓';
+  document.getElementById('json-toggle').classList.toggle('open', jsonOpen);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+</script>
+</body>
+</html>

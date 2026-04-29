@@ -13,6 +13,12 @@ import asyncio, sys, json, re, os
 import httpx
 from bs4 import BeautifulSoup
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # install with: pip install python-dotenv
+
 # ─────────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────────
@@ -237,7 +243,8 @@ Return ONLY valid JSON, no markdown, no explanation:
   "icp": {{
     "personas":     ["Job title e.g. VP Sales", "Marketing Manager"],
     "company_size": ["SMB", "Mid-Market", "Enterprise"],
-    "industries":   ["SaaS", "Financial Services"]
+    "industries":   ["SaaS", "Financial Services"],
+    "summary":      "2-3 sentences as flowing prose weaving together industries, company size, and personas. Example: Targets mid-market and enterprise B2B SaaS companies with 200+ employees. Primary buyers are VP of Sales and Revenue Operations leaders looking to reduce manual prospecting."
   }},
 
   "offerings": [

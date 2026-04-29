@@ -155,9 +155,15 @@ function render(d) {
   document.getElementById('r-vp').textContent   = d.value_proposition || '—';
 
   const icp = d.icp || {};
-  let icpHtml = tags(icp.personas, 'tp');
+  // Show summary paragraph if available, then tags underneath
+  let icpHtml = '';
+  if (icp.summary) {
+    icpHtml += `<p style="font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px">${icp.summary}</p>`;
+  }
+  if (icp.personas?.length)     icpHtml += tags(icp.personas, 'tp');
   if (icp.company_size?.length) icpHtml += '<div style="margin-top:8px">' + tags(icp.company_size, 'tg') + '</div>';
-  document.getElementById('r-icp').innerHTML = icpHtml;
+  if (icp.industries?.length)   icpHtml += '<div style="margin-top:8px">' + tags(icp.industries, 'tgr') + '</div>';
+  document.getElementById('r-icp').innerHTML = icpHtml || '<span class="none">Not found</span>';
 
   let ecoHtml = tags(d.existing_customers, 'tgr');
   if (d.partners?.length) ecoHtml += '<div style="margin-top:8px">' + tags(d.partners, 'tgr') + '</div>';
